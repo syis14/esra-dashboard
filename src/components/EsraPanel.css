@@ -1,0 +1,112 @@
+.esra-panel h2 { margin-bottom: 0.5rem; color: var(--text-primary); }
+
+.description { color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.88rem; }
+
+/* ── Disclaimer ──────────────────────────────── */
+.disclaimer-banner {
+  background-color: rgba(245,158,11,0.1);
+  border-left: 4px solid #f59e0b;
+  padding: 0.85rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.25rem;
+}
+.disclaimer-banner strong { color: #d97706; display: block; margin-bottom: 0.4rem; font-size: 0.85rem; }
+.disclaimer-banner p       { color: var(--text-secondary); font-size: 0.78rem; margin: 0; line-height: 1.55; }
+
+/* ── Status pill ─────────────────────────────── */
+.news-status-row { margin-bottom: 1rem; }
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.status-idle    { background: rgba(100,116,139,0.15); color: var(--text-secondary); border: 1px solid rgba(100,116,139,0.2); }
+.status-loading { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); }
+.status-ready   { background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
+
+/* ── Buttons ─────────────────────────────────── */
+.btn-generate { margin-bottom: 0.75rem; width: 100%; font-weight: 700; }
+.btn-copy {
+  padding: 0.45rem 1.1rem;
+  font-size: 0.82rem;
+  background: #25d366;
+  border-color: #25d366;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 8px;
+  transition: opacity 0.2s;
+}
+.btn-copy:hover   { opacity: 0.88; }
+.btn-copied       { background: #16a34a !important; border-color: #16a34a !important; }
+
+/* ── Run time badge ──────────────────────────── */
+.run-time-badge {
+  margin-top: 0.6rem;
+  padding: 0.4rem 0.7rem;
+  background: rgba(59,130,246,0.1);
+  border-radius: 8px;
+  color: #60a5fa;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid rgba(59,130,246,0.2);
+}
+
+/* ── Report output ───────────────────────────── */
+.esra-result {
+  margin-top: 1.25rem;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.report-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface-elevated);
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.report-risk-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.risk-chip {
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.risk-red    { background: rgba(239,68,68,0.15);   color: #ef4444; border: 1px solid rgba(239,68,68,0.25); }
+.risk-yellow { background: rgba(245,158,11,0.15);  color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); }
+.risk-green  { background: rgba(34,197,94,0.12);   color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
+.risk-overall { font-size: 0.82rem; font-weight: 700; color: var(--text-primary); padding-left: 0.25rem; }
+
+/* ── Report text (WhatsApp preview) ─────────── */
+.report-preview {
+  max-height: 55vh;
+  overflow-y: auto;
+  background: #0f1923;
+  padding: 1rem 1.1rem;
+}
+.report-preview::-webkit-scrollbar       { width: 4px; }
+.report-preview::-webkit-scrollbar-thumb { background: var(--surface-border); border-radius: 4px; }
+
+.report-text {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: #d4dce8;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}

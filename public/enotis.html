@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Weekly Epidemiology Review – Malaysia (e-Notifikasi)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- SheetJS for Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Chart.js for charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Leaflet for map -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <style>
+    :root {
+      /* Light Mode Colors */
+      --bg-color: #f5f7fb;
+      --surface-color: #ffffff;
+      --surface-border: #e0e3f0;
+      --text-primary: #1a1e29;
+      --text-secondary: #667085;
+      --accent-color: #2563eb;
+      --accent-hover: #1d4ed8;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      --input-bg: #ffffff;
+      --input-border: #d0d5dd;
+      --pill-up-bg: #e9f8ef; --pill-up-text: #117a2b;
+      --pill-down-bg: #fde9ea; --pill-down-text: #a1232f;
+      --pill-neutral-bg: #edf0fb; --pill-neutral-text: #444b9a;
+      --th-bg: #f0f2f7;
+    }
+
+    body.dark {
+      /* Dark Mode Colors */
+      --bg-color: #0b0f19;
+      --surface-color: #111827;
+      --surface-border: #1f2937;
+      --text-primary: #f9fafb;
+      --text-secondary: #9ca3af;
+      --accent-color: #3b82f6;
+      --accent-hover: #60a5fa;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+      --input-bg: #1f2937;
+      --input-border: #374151;
+      --pill-up-bg: rgba(17, 122, 43, 0.2); --pill-up-text: #4ade80;
+      --pill-down-bg: rgba(161, 35, 47, 0.2); --pill-down-text: #f87171;
+      --pill-neutral-bg: rgba(68, 75, 154, 0.2); --pill-neutral-text: #818cf8;
+      --th-bg: #1f2937;
+    }
+
+    body {
+      margin: 0;
+      padding: 1.5rem;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg-color);
+      color: var(--text-primary);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    h1 {
+      margin: 0 0 0.25rem 0;
+      font-size: 1.5rem;
+    }
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.2rem;
+    }
+    .small-text {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    input[type="file"], select {
+      font-size: 0.85rem;
+      padding: 0.4rem 0.6rem;
+      background-color: var(--input-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--input-border);
+      border-radius: 6px;
+      outline: none;
+    }
+    select:focus, input[type="file"]:focus {
+      border-color: var(--accent-color);
+    }
+    .badge {
+      display: inline-block;
+      background: var(--pill-neutral-bg);
+      color: var(--pill-neutral-text);
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.8rem;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .card {
+      background: var(--surface-color);
+      padding: 1rem 1.2rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--surface-border);
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+    .card-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+    }
+    .card-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .layout-2col {
+      display: grid;
+      grid-template-columns: 2fr 3fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .layout-3col {
+      display: grid;
+      grid-template-columns: 2fr 2fr 3fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    @media (max-width: 1100px) {
+      .layout-3col { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) {
+      .layout-2col { grid-template-columns: 1fr; }
+    }
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: var(--text-primary);
+    }
+    .section-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+    .table-container {
+      max-height: 260px;
+      overflow: auto;
+      border-radius: 8px;
+      border: 1px solid var(--surface-border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    th, td {
+      padding: 0.5rem 0.6rem;
+      border-bottom: 1px solid var(--surface-border);
+      text-align: left;
+      vertical-align: top;
+      color: var(--text-primary);
+    }
+    th {
+      background: var(--th-bg);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      font-weight: 600;
+    }
+    canvas {
+      width: 100% !important;
+      height: 260px !important;
+    }
+    .pill {
+      display: inline-block;
+      padding: 0.1rem 0.4rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .pill-up { background: var(--pill-up-bg); color: var(--pill-up-text); }
+    .pill-down { background: var(--pill-down-bg); color: var(--pill-down-text); }
+    .pill-neutral { background: var(--pill-neutral-bg); color: var(--pill-neutral-text); }
+    
+    button {
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+      border: none;
+      background: var(--accent-color);
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover { background: var(--accent-hover); }
+    
+    #map {
+      width: 100%;
+      height: 420px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--surface-border);
+    }
+    .legend {
+      background: var(--surface-color);
+      color: var(--text-primary);
+      padding: 6px 8px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--surface-border);
+      font-size: 0.75rem;
+      line-height: 1.2;
+    }
+    .legend-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .legend-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #e53935;
+      border: 1px solid #b71c1c;
+    }
+    .mini-bar {
+      display: flex;
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: var(--surface-border);
+      margin-bottom: 2px;
+    }
+    .mini-bar-seg { height: 100%; }
+    .seg-good { background: #2e7d32; }
+    .seg-med  { background: #f9a825; }
+    .seg-bad  { background: #c62828; }
+    .mini-bar-label {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+    .text-good { color: #4ade80; font-weight: 600; }
+    .text-med  { color: #fbbf24; font-weight: 600; }
+    .text-bad  { color: #f87171; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div>
+      <h1>Weekly Epidemiology Review – Malaysia</h1>
+      <div class="small-text">
+        <b>Made by Dr. Mohd Syis Zulkipli @ 2025 (drsyizz@gmail.com)</b>
+      </div>
+      <div class="small-text">
+        Upload e-Notifikasi Excel/CSV, kemudian pilih ME, Daerah, Mukim, status dan penyakit.
+      </div>
+    </div>
+    <div>
+      <div class="badge">Upload e-Notifikasi</div>
+      <input id="fileInput" type="file" accept=".xls,.xlsx,.csv" />
+    </div>
+  </div>
+
+  <div class="controls">
+    <span class="small-text">Daerah:</span>
+    <select id="districtSelect"></select>
+
+    <span class="small-text">Mukim/Zon:</span>
+    <select id="mukimSelect"></select>
+
+    <span class="small-text">Epi Year/Week (Tkh Input Notifikasi):</span>
+    <select id="weekSelect"></select>
+
+    <span class="small-text">Focus disease:</span>
+    <select id="diseaseSelect"></select>
+
+    <span class="small-text">Status Notifikasi:</span>
+    <select id="statusSelect"></select>
+
+    <button id="applyFiltersBtn">Apply</button>
+    <span class="small-text" id="recordInfo"></span>
+  </div>
+
+  <div class="summary-grid" id="summaryCards"></div>
+
+  <div class="layout-2col">
+    <div class="card">
+      <div class="section-title">Trend 54 Minggu – Semua Penyakit</div>
+      <div class="section-subtitle">Total notifications by epi week (Tkh Input Notifikasi), last 54 weeks.</div>
+      <canvas id="trendChart"></canvas>
+    </div>
+    <div class="card">
+      <div class="section-title">Top Diseases – Selected Period</div>
+      <div class="section-subtitle">Top 10 diagnoses untuk tempoh dipilih.</div>
+      <canvas id="topDiseaseChart"></canvas>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="section-title">Trend Mengikut Penyakit</div>
+    <div class="section-subtitle">
+      Mengikut penapis Daerah, Mukim, Epi Week, Status Notifikasi dan Focus disease (All = Top 5, 54 minggu terkini).
+    </div>
+    <canvas id="diseaseTrendChart"></canvas>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="section-title">Peta Kes – Tempoh Dipilih</div>
+    <div class="section-subtitle">
+      Pin lokasi berdasarkan <b>Latitude (WGS)</b> &amp; <b>Longitude (WGS)</b> alamat semasa/kejadian.
+    </div>
+    <div id="map"></div>
+  </div>
+
+  <div class="layout-3col">
+    <div class="card">
+      <div class="section-title">Top Localities</div>
+      <div class="section-subtitle">By <b>Lokaliti</b> untuk tempoh dipilih.</div>
+      <div class="table-container" id="topLocalityTable"></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Top Facilities</div>
+      <div class="section-subtitle">By <b>Kemudahan Kesihatan</b> untuk tempoh dipilih.</div>
+      <div class="table-container" id="topFacilityTable"></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Demographic Profile</div>
+      <div class="section-subtitle">Age groups & gender (tempoh dipilih).</div>
+      <canvas id="demoChart"></canvas>
+    </div>
+  </div>
+
+  <div class="layout-3col">
+    <div class="card">
+      <div class="section-title">Timeliness Indicators</div>
+      <div class="section-subtitle">
+        Perbezaan hari menggunakan <b>Tarikh Onset</b>, <b>Tkh Notifikasi</b>, <b>Tkh Daftar</b>.
+      </div>
+      <div id="timelinessSummary" class="small-text"></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Data Quality Checks</div>
+      <div class="section-subtitle">Missing key fields (tempoh dipilih).</div>
+      <div class="table-container" id="dqTable"></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Kes Belum Ambil Tindakan – Tempoh Dipilih</div>
+      <div class="section-subtitle">
+        Rekod yang <b>tiada Tkh Daftar</b> dan <b>tiada Tarikh Batal</b>.
+      </div>
+      <div id="pendingSummary" class="small-text"></div>
+      <div class="table-container" id="pendingDiagnosisTable"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="section-title">Lewat Notifikasi &amp; Kes Input PKD</div>
+    <div class="section-subtitle">
+      Pecahan mengikut Pejabat Kesihatan (PKD) untuk notifikasi lewat
+      (<b>Tarikh Diagnosis → Tkh Notifikasi</b> mengikut ambang penyakit-spesifik berdasarkan
+      Garispanduan Notifikasi Penyakit Berjangkit KKM), serta prestasi
+      <b>Daftar Notifikasi</b>, <b>Daftar Kes</b> dan <b>Prestasi Daftar Kes (Dx → Daftar)</b>.
+      Mengikut penapis semasa (Epi Week, Daerah, Mukim, Status Notifikasi, Disease). Diikuti line list kes lewat.
+    </div>
+    <div class="table-container" id="latenessPKDTable" style="margin-bottom:0.5rem;"></div>
+    <div class="section-subtitle">
+      Line list kes yang lewat notifikasi (Dx → Notif melebihi ambang penyakit-spesifik, maksimum 200 rekod).
+    </div>
+    <div class="table-container" id="latenessPKDList"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Line List Preview – Tempoh Dipilih</div>
+    <div class="section-subtitle">
+      First 200 records. Columns: Epi week, Diagnosis, Daerah, Mukim, Lokaliti, Kemudahan, Tarikh Onset,
+      Tkh Notifikasi, Tkh Daftar, Umur (Tahun), Jantina, Notifikasi Status.
+    </div>
+    <div class="table-container" id="lineListTable"></div>
+  </div>
+
+  <script>
+    // Listen for theme changes from parent React App
+    window.addEventListener("message", (event) => {
+      if (event.data && event.data.theme) {
+        if (event.data.theme === 'dark') {
+          document.body.classList.add('dark');
+        } else {
+          document.body.classList.remove('dark');
+        }
+        
+        // Tell Chart.js to re-render with new colors
+        const textColor = event.data.theme === 'dark' ? '#9ca3af' : '#667085';
+        const gridColor = event.data.theme === 'dark' ? '#1f2937' : '#e0e3f0';
+        Chart.defaults.color = textColor;
+        Chart.defaults.scale.grid.color = gridColor;
+        
+        // Trigger resize to force re-render
+        window.dispatchEvent(new Event('resize'));
+      }
+    });
+
+    // Notify parent we are ready to receive theme
+    window.parent.postMessage({ type: 'ENOTIS_READY' }, '*');
+
+    const COL = {
+      epiYear: "Epid Tahun (Tkh Input Notifikasi)",
+      epiWeek: "Epid Minggu (Tkh Input Notifikasi)",
+      disease: "Diagnosis",
+      subDisease: "Sub Diagnosis",
+      district: "Daerah",
+      mukim: "Mukim/Zon",
+      locality: "Lokaliti",
+      facility: "Kemudahan Kesihatan",
+      pkd: "Pejabat Kesihatan",
+      onset: "Tarikh Onset",
+      notif: "Tkh Notifikasi",
+      notifInput: "Tkh Input Notifikasi",
+      notifReceive: "Tkh Terima Notifikasi",
+      daftarNotif: "Tkh Daftar Notifikasi",
+      daftar: "Tkh Daftar",
+      dxDate: "Tarikh Diagnosis",
+      cancelDate: "Tarikh Batal",
+      ageYear: "Umur (Tahun)",
+      sex: "Jantina",
+      statusNotifikasi: "Notifikasi Status",
+      notifBy: "Pihak Pemberitahu",
+      latWgs: "Latitude (WGS)",
+      lonWgs: "Longitude (WGS)"
+    };
+
+    const NOTIF_THRESHOLD_DAYS = {
+      "DENGUE FEVER": 1,
+      "DENGUE": 1,
+      "DF": 1,
+      "HAND FOOT AND MOUTH DISEASE": 1,
+      "HFMD": 1,
+      "MEASLES": 1,
+      "CAMPAK": 1,
+      "TUBERCULOSIS": 7,
+      "TB": 7,
+      "HEPATITIS": 7,
+      "HEPATITIS A": 7,
+      "HEPATITIS B": 7,
+      "HEPATITIS C": 7,
+      "HEPATITIS E": 7
+    };
+
+    function getNotifThresholdDays(diseaseRaw) {
+      if (!diseaseRaw) return 7;
+      const d = diseaseRaw.toString().trim().toUpperCase();
+      if (NOTIF_THRESHOLD_DAYS[d] != null) return NOTIF_THRESHOLD_DAYS[d];
+      if (d.startsWith("HEPATITIS")) return 7;
+      if (d.startsWith("DENGUE")) return 1;
+      if (d.startsWith("TB") || d.startsWith("TUBERCULOSIS")) return 7;
+      return 7;
+    }
+
+    function isPKDNotifier(notifBy) {
+      if (!notifBy) return false;
+      const s = notifBy.toString().toUpperCase();
+      const keywords = [
+        "PKD",
+        "PEJABAT KESIHATAN",
+        "DISTRICT HEALTH OFFICE",
+        "DHO"
+      ];
+      return keywords.some(k => s.includes(k));
+    }
+
+    let rawRows = [];
+    let processedRows = [];
+    let epiWeeks = [];
+
+    let trendChart = null;
+    let topDiseaseChart = null;
+    let demoChart = null;
+    let diseaseTrendChart = null;
+    let mapInstance = null;
+    let markersLayer = null;
+    let redIcon = null;
+
+    const fileInput = document.getElementById("fileInput");
+    const weekSelect = document.getElementById("weekSelect");
+    const diseaseSelect = document.getElementById("diseaseSelect");
+    const districtSelect = document.getElementById("districtSelect");
+    const mukimSelect = document.getElementById("mukimSelect");
+    const statusSelect = document.getElementById("statusSelect");
+    const applyBtn = document.getElementById("applyFiltersBtn");
+    const recordInfo = document.getElementById("recordInfo");
+    const summaryCards = document.getElementById("summaryCards");
+    const topLocalityTable = document.getElementById("topLocalityTable");
+    const topFacilityTable = document.getElementById("topFacilityTable");
+    const timelinessSummary = document.getElementById("timelinessSummary");
+    const dqTable = document.getElementById("dqTable");
+    const lineListTable = document.getElementById("lineListTable");
+    const latenessPKDTable = document.getElementById("latenessPKDTable");
+    const latenessPKDList = document.getElementById("latenessPKDList");
+    const pendingSummary = document.getElementById("pendingSummary");
+    const pendingDiagnosisTable = document.getElementById("pendingDiagnosisTable");
+
+    const trendCanvas = document.getElementById("trendChart");
+    const topDiseaseCanvas = document.getElementById("topDiseaseChart");
+    const demoCanvas = document.getElementById("demoChart");
+    const diseaseTrendCanvas = document.getElementById("diseaseTrendChart");
+
+    fileInput.addEventListener("change", handleFile);
+    applyBtn.addEventListener("click", refreshAll);
+    districtSelect.addEventListener("change", refreshAll);
+    mukimSelect.addEventListener("change", refreshAll);
+    statusSelect.addEventListener("change", refreshAll);
+
+    function handleFile(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const data = new Uint8Array(evt.target.result);
+        const wb = XLSX.read(data, { type: "array", cellDates: true });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        rawRows = XLSX.utils.sheet_to_json(ws, { defval: null });
+        preprocessRows();
+        buildEpiWeekList();
+        populateWeekSelect();
+        populateDiseaseSelect();
+        populateDistrictSelect();
+        populateMukimSelect();
+        populateStatusSelect();
+        initMap();
+        refreshAll();
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function parseDate(val) {
+      if (!val) return null;
+      if (val instanceof Date) return val;
+      const d = new Date(val);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    function diffDays(a, b) {
+      if (!a || !b) return null;
+      const ms = b - a;
+      return ms / (1000 * 60 * 60 * 24);
+    }
+
+    // NOW: status filter depends purely on the "Notifikasi Status" column
+    function statusFilterPasses(r) {
+      const val = statusSelect.value;
+      if (!val) return true; // semua status
+      const s = (r.notifStatus || "").toString().trim();
+      return s === val;
+    }
+
+    function preprocessRows() {
+      processedRows = rawRows.map(r => {
+        const epiYear = r[COL.epiYear];
+        const epiWeek = r[COL.epiWeek];
+        const disease = (r[COL.disease] || "").toString().trim() || "(Tiada Diagnosis)";
+        const subDisease = (r[COL.subDisease] || "").toString().trim();
+        const district = (r[COL.district] || "").toString().trim().toUpperCase();
+        const mukim = (r[COL.mukim] || "").toString().trim();
+        const locality = (r[COL.locality] || "").toString().trim();
+        const facility = (r[COL.facility] || "").toString().trim();
+        const pkd = (r[COL.pkd] || "").toString().trim();
+        const ageYear = r[COL.ageYear];
+        const sex = (r[COL.sex] || "").toString().trim();
+        const notifStatus = (r[COL.statusNotifikasi] || "").toString().trim();
+        const notifBy = (r[COL.notifBy] || "").toString().trim();
+
+        const onsetDate = parseDate(r[COL.onset]);
+        const notifInputDate = parseDate(r[COL.notifInput]);
+        const notifReceiveDate = parseDate(r[COL.notifReceive]);
+        const daftarNotifDate = parseDate(r[COL.daftarNotif]);
+        const daftarDate = parseDate(r[COL.daftar]);
+        const dxDate = parseDate(r[COL.dxDate]);
+        const cancelDate = parseDate(r[COL.cancelDate]);
+
+        const notifDate =
+          parseDate(r[COL.notif]) || notifInputDate || notifReceiveDate;
+
+        const onsetToNotif = diffDays(onsetDate, notifDate);
+        const notifToDaftar = diffDays(notifDate, daftarDate);
+        const dxToNotif = diffDays(dxDate, notifDate);
+        const inputToDaftarNotif = diffDays(notifInputDate, daftarNotifDate);
+        const daftarNotifToDaftarKes = diffDays(daftarNotifDate, daftarDate);
+        const dxToDaftar = diffDays(dxDate, daftarDate);
+
+        const lat = r[COL.latWgs] != null ? Number(r[COL.latWgs]) : null;
+        const lon = r[COL.lonWgs] != null ? Number(r[COL.lonWgs]) : null;
+        const hasCoord = lat != null && lon != null && !isNaN(lat) && !isNaN(lon);
+
+        return {
+          raw: r,
+          epiYear,
+          epiWeek,
+          disease,
+          subDisease,
+          district,
+          mukim,
+          locality,
+          facility,
+          pkd,
+          ageYear,
+          sex,
+          notifStatus,
+          notifBy,
+          onsetDate,
+          notifInputDate,
+          notifReceiveDate,
+          notifDate,
+          daftarNotifDate,
+          daftarDate,
+          dxDate,
+          cancelDate,
+          onsetToNotif,
+          notifToDaftar,
+          dxToNotif,
+          inputToDaftarNotif,
+          daftarNotifToDaftarKes,
+          dxToDaftar,
+          lat,
+          lon,
+          hasCoord
+        };
+      }).filter(row => row.epiWeek != null && row.epiYear != null);
+    }
+
+    function buildEpiWeekList() {
+      const map = new Map();
+      processedRows.forEach(r => {
+        const label = `${r.epiYear}-W${r.epiWeek}`;
+        if (!map.has(label)) map.set(label, { label, year: Number(r.epiYear), week: Number(r.epiWeek) });
+      });
+      epiWeeks = Array.from(map.values()).sort((a, b) => {
+        if (a.year !== b.year) return a.year - b.year;
+        return a.week - b.week;
+      });
+    }
+
+    function populateWeekSelect() {
+      weekSelect.innerHTML = "";
+      const optAll = document.createElement("option");
+      optAll.value = "ALL";
+      optAll.textContent = "All weeks (YTD)";
+      weekSelect.appendChild(optAll);
+      epiWeeks.forEach(w => {
+        const opt = document.createElement("option");
+        opt.value = w.label;
+        opt.textContent = w.label;
+        weekSelect.appendChild(opt);
+      });
+      if (epiWeeks.length > 0) {
+        weekSelect.selectedIndex = weekSelect.options.length - 1;
+      }
+    }
+
+    function populateDiseaseSelect() {
+      diseaseSelect.innerHTML = "";
+      const diseases = new Set();
+      processedRows.forEach(r => { if (r.disease) diseases.add(r.disease); });
+      const diseaseList = Array.from(diseases).sort();
+      const optAll = document.createElement("option");
+      optAll.value = "";
+      optAll.textContent = "All diseases";
+      diseaseSelect.appendChild(optAll);
+      diseaseList.forEach(d => {
+        const opt = document.createElement("option");
+        opt.value = d;
+        opt.textContent = d;
+        diseaseSelect.appendChild(opt);
+      });
+    }
+
+    function populateDistrictSelect() {
+      districtSelect.innerHTML = "";
+      const optAll = document.createElement("option");
+      optAll.value = "";
+      optAll.textContent = "Semua daerah";
+      districtSelect.appendChild(optAll);
+
+      const set = new Set();
+      processedRows.forEach(r => { if (r.district) set.add(r.district); });
+      Array.from(set).sort().forEach(d => {
+        const opt = document.createElement("option");
+        opt.value = d;
+        opt.textContent = d;
+        districtSelect.appendChild(opt);
+      });
+    }
+
+    function populateMukimSelect() {
+      mukimSelect.innerHTML = "";
+      const optAll = document.createElement("option");
+      optAll.value = "";
+      optAll.textContent = "Semua mukim/zon";
+      mukimSelect.appendChild(optAll);
+
+      const set = new Set();
+      processedRows.forEach(r => { if (r.mukim) set.add(r.mukim); });
+      Array.from(set).sort().forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m;
+        opt.textContent = m;
+        mukimSelect.appendChild(opt);
+      });
+    }
+
+    function populateStatusSelect() {
+      statusSelect.innerHTML = "";
+      const optAll = document.createElement("option");
+      optAll.value = "";
+      optAll.textContent = "Semua Status Notifikasi";
+      statusSelect.appendChild(optAll);
+
+      const set = new Set();
+      processedRows.forEach(r => {
+        if (r.notifStatus) set.add(r.notifStatus);
+      });
+      Array.from(set).sort().forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.textContent = s;
+        statusSelect.appendChild(opt);
+      });
+    }
+
+    function getSelectedWeekRows() {
+      const label = weekSelect.value;
+      const diseaseFilter = diseaseSelect.value;
+      const districtFilter = districtSelect.value;
+      const mukimFilter = mukimSelect.value;
+
+      if (label === "ALL") {
+        return processedRows.filter(r =>
+          (!diseaseFilter || r.disease === diseaseFilter) &&
+          (!districtFilter || r.district === districtFilter) &&
+          (!mukimFilter || r.mukim === mukimFilter) &&
+          statusFilterPasses(r)
+        );
+      }
+      const [yearStr, weekStr] = label.split("-W");
+      const year = Number(yearStr);
+      const week = Number(weekStr);
+
+      return processedRows.filter(r =>
+        Number(r.epiYear) === year &&
+        Number(r.epiWeek) === week &&
+        (!diseaseFilter || r.disease === diseaseFilter) &&
+        (!districtFilter || r.district === districtFilter) &&
+        (!mukimFilter || r.mukim === mukimFilter) &&
+        statusFilterPasses(r)
+      );
+    }
+
+    function getWeekCount(year, week, districtFilter = "", mukimFilter = "") {
+      return processedRows.filter(r =>
+        Number(r.epiYear) === year &&
+        Number(r.epiWeek) === week &&
+        (!districtFilter || r.district === districtFilter) &&
+        (!mukimFilter || r.mukim === mukimFilter) &&
+        statusFilterPasses(r)
+      ).length;
+    }
+
+    function refreshAll() {
+      if (!processedRows.length || !epiWeeks.length) return;
+      const selectedLabel = weekSelect.value || weekSelect.options[weekSelect.options.length - 1].value;
+      weekSelect.value = selectedLabel;
+
+      const rows = getSelectedWeekRows();
+      const periodText = selectedLabel === "ALL" ? "All weeks (YTD)" : selectedLabel;
+      const statusText = statusSelect.selectedOptions[0]?.textContent || "Semua Status Notifikasi";
+      recordInfo.textContent = rows.length
+        ? \`Selected period: \${periodText} | Daerah: \${districtSelect.value || "Semua"} | Mukim: \${mukimSelect.value || "Semua"} | Status: \${statusText} | Records: \${rows.length.toLocaleString()}\`
+        : \`Selected period: \${periodText}, no records.\`;
+
+      renderSummaryCards(rows, selectedLabel);
+      renderTrendChart();
+      renderTopDiseaseChart(rows);
+      renderDiseaseTrendChart();
+      renderMapPins(rows);
+      renderTopLocalityTable(rows);
+      renderTopFacilityTable(rows);
+      renderDemographicChart(rows);
+      renderTimeliness(rows);
+      renderDQTable(rows);
+      renderPending(rows);
+      renderLineList(rows);
+      renderLatenessPKD(selectedLabel);
+    }
+
+    function makeCard(title, value) {
+      const c = document.createElement("div");
+      c.className = "card";
+      c.innerHTML = \`<div class="card-title">\${title}</div><div class="card-value">\${value}</div>\`;
+      return c;
+    }
+
+    function median(arr) {
+      if (!arr.length) return 0;
+      const sorted = [...arr].sort((a, b) => a - b);
+      const mid = Math.floor(sorted.length / 2);
+      if (sorted.length % 2 === 0) return (sorted[mid - 1] + sorted[mid]) / 2;
+      return sorted[mid];
+    }
+
+    function aggregateCount(rows, keyFn, topN = null) {
+      const m = new Map();
+      rows.forEach(r => {
+        const key = keyFn(r) || "(Tidak diketahui)";
+        m.set(key, (m.get(key) || 0) + 1);
+      });
+      let arr = Array.from(m.entries()).map(([key, count]) => ({ key, count }));
+      arr.sort((a, b) => b.count - a.count);
+      if (topN != null) arr = arr.slice(0, topN);
+      return arr;
+    }
+
+    function renderSummaryCards(rows, label) {
+      summaryCards.innerHTML = "";
+      const cardElems = [];
+
+      const totalCases = rows.length;
+      cardElems.push(makeCard("Total cases (tempoh dipilih)", totalCases.toLocaleString()));
+
+      if (label === "ALL") {
+        const changeCard = document.createElement("div");
+        changeCard.className = "card";
+        changeCard.innerHTML = \`
+          <div class="card-title">Change vs previous week</div>
+          <div class="card-value">
+            <span class="pill pill-neutral">≈</span>
+            <span>n/a (All weeks)</span>
+          </div>\`;
+        cardElems.push(changeCard);
+      } else {
+        const [yearStr, weekStr] = label.split("-W");
+        const year = Number(yearStr);
+        const week = Number(weekStr);
+        const prevWeek = week - 1;
+        const districtFilter = districtSelect.value;
+        const mukimFilter = mukimSelect.value;
+        let wowPill = "";
+        let changeText = "n/a";
+        if (prevWeek > 0) {
+          const thisCount = getWeekCount(year, week, districtFilter, mukimFilter);
+          const prevCount = getWeekCount(year, prevWeek, districtFilter, mukimFilter);
+          if (prevCount > 0) {
+            const diff = ((thisCount - prevCount) / prevCount) * 100;
+            const rounded = diff.toFixed(1);
+            changeText = \`\${rounded}% vs last week\`;
+            if (diff > 5) wowPill = \`<span class="pill pill-up">↑</span>\`;
+            else if (diff < -5) wowPill = \`<span class="pill pill-down">↓</span>\`;
+            else wowPill = \`<span class="pill pill-neutral">≈</span>\`;
+          }
+        }
+        const changeCard = document.createElement("div");
+        changeCard.className = "card";
+        changeCard.innerHTML = \`
+          <div class="card-title">Change vs previous week (all diseases)</div>
+          <div class="card-value">\${wowPill} <span>\${changeText}</span></div>\`;
+        cardElems.push(changeCard);
+      }
+
+      const diseaseCounts = aggregateCount(rows, r => r.disease);
+      let topDisease = "-";
+      let topCount = 0;
+      if (diseaseCounts.length) {
+        topDisease = diseaseCounts[0].key;
+        topCount = diseaseCounts[0].count;
+      }
+      cardElems.push(makeCard("Top disease (tempoh dipilih)", \`\${topDisease} (\${topCount})\`));
+
+      const onsetVals = rows.map(r => r.onsetToNotif).filter(v => v != null && isFinite(v));
+      const notifVals = rows.map(r => r.notifToDaftar).filter(v => v != null && isFinite(v));
+      const medOnset = onsetVals.length ? median(onsetVals).toFixed(1) : "n/a";
+      const medNotif = notifVals.length ? median(notifVals).toFixed(1) : "n/a";
+      cardElems.push(makeCard("Median days Onset → Notif", medOnset));
+      cardElems.push(makeCard("Median days Notif → Daftar", medNotif));
+
+      cardElems.forEach(c => summaryCards.appendChild(c));
+    }
+
+    function renderTrendChart() {
+      const MAX_WEEKS = 54;
+      const districtFilter = districtSelect.value;
+      const mukimFilter = mukimSelect.value;
+      const weekMap = new Map();
+
+      processedRows.forEach(r => {
+        if (districtFilter && r.district !== districtFilter) return;
+        if (mukimFilter && r.mukim !== mukimFilter) return;
+        if (!statusFilterPasses(r)) return;
+        const label = \`\${r.epiYear}-W\${r.epiWeek}\`;
+        weekMap.set(label, (weekMap.get(label) || 0) + 1);
+      });
+
+      let arr = Array.from(weekMap.entries()).map(([label, count]) => ({ label, count }));
+      arr.sort((a, b) => {
+        const [ya, wa] = a.label.split("-W").map(Number);
+        const [yb, wb] = b.label.split("-W").map(Number);
+        if (ya !== yb) return ya - yb;
+        return wa - wb;
+      });
+      if (arr.length > MAX_WEEKS) arr = arr.slice(-MAX_WEEKS);
+
+      const labels = arr.map(x => x.label);
+      const data = arr.map(x => x.count);
+
+      if (trendChart) trendChart.destroy();
+      trendChart = new Chart(trendCanvas.getContext("2d"), {
+        type: "line",
+        data: {
+          labels,
+          datasets: [{ label: "Total notifications", data, fill: false }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { autoSkip: true, maxTicksLimit: 12 } },
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    function renderTopDiseaseChart(rows) {
+      if (topDiseaseChart) topDiseaseChart.destroy();
+      const agg = aggregateCount(rows, r => r.disease, 10);
+      const labels = agg.map(a => a.key);
+      const counts = agg.map(a => a.count);
+
+      topDiseaseChart = new Chart(topDiseaseCanvas.getContext("2d"), {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [{ label: "Cases", data: counts }]
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: { x: { beginAtZero: true } }
+        }
+      });
+    }
+
+    function renderDiseaseTrendChart() {
+      if (!processedRows.length) return;
+      if (diseaseTrendChart) diseaseTrendChart.destroy();
+
+      const MAX_WEEKS = 54;
+      const districtFilter = districtSelect.value;
+      const mukimFilter = mukimSelect.value;
+      const focusDisease = diseaseSelect.value;
+      const weekLabel = weekSelect.value;
+
+      const weekSet = new Set();
+      processedRows.forEach(r => {
+        if (districtFilter && r.district !== districtFilter) return;
+        if (mukimFilter && r.mukim !== mukimFilter) return;
+        if (!statusFilterPasses(r)) return;
+        weekSet.add(\`\${r.epiYear}-W\${r.epiWeek}\`);
+      });
+
+      let labelsArr = Array.from(weekSet).map(label => {
+        const [y, w] = label.split("-W").map(Number);
+        return { label, year: y, week: w };
+      });
+      if (!labelsArr.length) return;
+
+      labelsArr.sort((a, b) => {
+        if (a.year !== b.year) return a.year - b.year;
+        return a.week - b.week;
+      });
+
+      let selectedIndex = labelsArr.length - 1;
+      if (weekLabel && weekLabel !== "ALL") {
+        const idx = labelsArr.findIndex(x => x.label === weekLabel);
+        if (idx !== -1) selectedIndex = idx;
+      }
+
+      const startIndex = Math.max(0, selectedIndex - (MAX_WEEKS - 1));
+      const windowArr = labelsArr.slice(startIndex, selectedIndex + 1);
+      const labels = windowArr.map(x => x.label);
+      const labelSetWindow = new Set(labels);
+
+      const filteredWindowRows = processedRows.filter(r => {
+        if (districtFilter && r.district !== districtFilter) return false;
+        if (mukimFilter && r.mukim !== mukimFilter) return false;
+        if (!statusFilterPasses(r)) return false;
+        const lbl = \`\${r.epiYear}-W\${r.epiWeek}\`;
+        if (!labelSetWindow.has(lbl)) return false;
+        if (focusDisease && r.disease !== focusDisease) return false;
+        return true;
+      });
+
+      let diseaseKeys;
+      if (focusDisease) {
+        diseaseKeys = [focusDisease];
+      } else {
+        diseaseKeys = aggregateCount(filteredWindowRows, r => r.disease, 5).map(a => a.key);
+      }
+      if (!diseaseKeys.length) return;
+
+      const datasets = diseaseKeys.map(dis => {
+        const data = labels.map(lbl => {
+          const [yearStr, weekStr] = lbl.split("-W");
+          const year = Number(yearStr), week = Number(weekStr);
+          return filteredWindowRows.filter(r =>
+            Number(r.epiYear) === year &&
+            Number(r.epiWeek) === week &&
+            r.disease === dis
+          ).length;
+        });
+        return { label: dis, data, fill: false };
+      });
+
+      diseaseTrendChart = new Chart(diseaseTrendCanvas.getContext("2d"), {
+        type: "line",
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { autoSkip: true, maxTicksLimit: 12 } },
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    function initMap() {
+      if (mapInstance) return;
+      mapInstance = L.map("map").setView([3.5, 102.0], 6);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 18,
+        attribution: "&copy; OpenStreetMap contributors"
+      }).addTo(mapInstance);
+
+      redIcon = new L.Icon({
+        iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      });
+
+      markersLayer = L.layerGroup().addTo(mapInstance);
+
+      const legend = L.control({ position: "bottomright" });
+      legend.onAdd = function(map) {
+        const div = L.DomUtil.create("div", "legend");
+        div.innerHTML = \`
+          <div class="legend-title">Legenda</div>
+          <div class="legend-item">
+            <span class="legend-swatch"></span>
+            <span>Lokasi kes (tempoh dipilih)</span>
+          </div>\`;
+        return div;
+      };
+      legend.addTo(mapInstance);
+    }
+
+    function renderMapPins(rows) {
+      if (!mapInstance || !markersLayer) return;
+      markersLayer.clearLayers();
+      const points = rows.filter(r => r.hasCoord);
+      if (!points.length) return;
+
+      const latlngs = [];
+      points.forEach(r => {
+        const latlng = [r.lat, r.lon];
+        latlngs.push(latlng);
+        const fmt = d => d ? d.toISOString().substring(0,10) : "";
+        const popupHtml = \`
+          <b>\${r.disease}</b><br/>
+          Daerah: \${r.district || "-"}<br/>
+          Mukim/Zon: \${r.mukim || "-"}<br/>
+          Lokaliti: \${r.locality || "-"}<br/>
+          Kemudahan: \${r.facility || "-"}<br/>
+          Onset: \${fmt(r.onsetDate)}<br/>
+          Notifikasi: \${fmt(r.notifDate)}
+        \`;
+        L.marker(latlng, { icon: redIcon }).bindPopup(popupHtml).addTo(markersLayer);
+      });
+      if (latlngs.length) {
+        mapInstance.fitBounds(L.latLngBounds(latlngs), { padding: [20, 20] });
+      }
+    }
+
+    function renderTopLocalityTable(rows) {
+      const agg = aggregateCount(rows, r => r.locality, 10);
+      topLocalityTable.innerHTML = "";
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      thead.innerHTML = "<tr><th>Rank</th><th>Lokaliti</th><th>Kes</th></tr>";
+      table.appendChild(thead);
+      const tbody = document.createElement("tbody");
+      agg.forEach((a, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = \`<td>\${idx + 1}</td><td>\${a.key}</td><td>\${a.count}</td>\`;
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      topLocalityTable.appendChild(table);
+    }
+
+    function renderTopFacilityTable(rows) {
+      const agg = aggregateCount(rows, r => r.facility, 10);
+      topFacilityTable.innerHTML = "";
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      thead.innerHTML = "<tr><th>Rank</th><th>Kemudahan</th><th>Kes</th></tr>";
+      table.appendChild(thead);
+      const tbody = document.createElement("tbody");
+      agg.forEach((a, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = \`<td>\${idx + 1}</td><td>\${a.key}</td><td>\${a.count}</td>\`;
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      topFacilityTable.appendChild(table);
+    }
+
+    function renderDemographicChart(rows) {
+      if (demoChart) demoChart.destroy();
+      const ageGroups = {
+        "<5": 0,
+        "5–14": 0,
+        "15–24": 0,
+        "25–44": 0,
+        "45–64": 0,
+        "65+": 0,
+        "Unknown": 0
+      };
+      rows.forEach(r => {
+        const age = Number(r.ageYear);
+        if (!isNaN(age)) {
+          if (age < 5) ageGroups["<5"]++;
+          else if (age < 15) ageGroups["5–14"]++;
+          else if (age < 25) ageGroups["15–24"]++;
+          else if (age < 45) ageGroups["25–44"]++;
+          else if (age < 65) ageGroups["45–64"]++;
+          else ageGroups["65+"]++;
+        } else {
+          ageGroups["Unknown"]++;
+        }
+      });
+      const labels = Object.keys(ageGroups);
+      const data = Object.values(ageGroups);
+      demoChart = new Chart(demoCanvas.getContext("2d"), {
+        type: "bar",
+        data: { labels, datasets: [{ label: "Kes mengikut kumpulan umur", data }] },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+
+    function renderTimeliness(rows) {
+      const onsetVals = rows.map(r => r.onsetToNotif).filter(v => v != null && isFinite(v));
+      const notifVals = rows.map(r => r.notifToDaftar).filter(v => v != null && isFinite(v));
+      const medOnset = onsetVals.length ? median(onsetVals).toFixed(1) : "n/a";
+      const medNotif = notifVals.length ? median(notifVals).toFixed(1) : "n/a";
+      const within2d = onsetVals.length
+        ? (onsetVals.filter(v => v <= 2).length / onsetVals.length * 100).toFixed(1)
+        : "n/a";
+      const within1d = notifVals.length
+        ? (notifVals.filter(v => v <= 1).length / notifVals.length * 100).toFixed(1)
+        : "n/a";
+
+      timelinessSummary.innerHTML = \`
+        <p><b>Onset → Notifikasi</b><br>
+        Median: <b>\${medOnset}</b> hari<br>
+        % dalam ≤2 hari: <b>\${within2d}%</b></p>
+        <p><b>Notifikasi → Daftar</b><br>
+        Median: <b>\${medNotif}</b> hari<br>
+        % dalam ≤1 hari: <b>\${within1d}%</b></p>
+        <p class="small-text">Nota: cut-off boleh dilaras mengikut buku definisi kes KKM.</p>
+      \`;
+    }
+
+    function renderDQTable(rows) {
+      const total = rows.length || 1;
+      const missingAge = rows.filter(r => r.ageYear == null || r.ageYear === "").length;
+      const missingOnset = rows.filter(r => !r.onsetDate).length;
+      const missingNotif = rows.filter(r => !r.notifDate).length;
+      const missingDaftar = rows.filter(r => !r.daftarDate).length;
+      const missingLocality = rows.filter(r => !r.locality).length;
+
+      const metrics = [
+        { var: "Umur (Tahun)", missing: missingAge },
+        { var: "Tarikh Onset", missing: missingOnset },
+        { var: "Tkh Notifikasi", missing: missingNotif },
+        { var: "Tkh Daftar", missing: missingDaftar },
+        { var: "Lokaliti", missing: missingLocality }
+      ];
+
+      dqTable.innerHTML = "";
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      thead.innerHTML = "<tr><th>Medan</th><th>Bil. kosong</th><th>%</th></tr>";
+      table.appendChild(thead);
+      const tbody = document.createElement("tbody");
+      metrics.forEach(m => {
+        const pct = ((m.missing / total) * 100).toFixed(1);
+        const tr = document.createElement("tr");
+        tr.innerHTML = \`<td>\${m.var}</td><td>\${m.missing}</td><td>\${pct}%</td>\`;
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      dqTable.appendChild(table);
+    }
+
+    function renderPending(rows) {
+      const total = rows.length || 1;
+      const pendingRows = rows.filter(r => !r.daftarDate && !r.cancelDate);
+      const pendingCount = pendingRows.length;
+      const pendingPct = ((pendingCount / total) * 100).toFixed(1);
+
+      pendingSummary.innerHTML =
+        \`Dalam tempoh dipilih terdapat <b>\${pendingCount}</b> kes \` +
+        \`(\${pendingPct}% daripada \${rows.length.toLocaleString()} rekod) \` +
+        \`yang masih belum ambil tindakan (tiada Tkh Daftar & tiada Tarikh Batal).\`;
+
+      const agg = aggregateCount(pendingRows, r => r.disease, 15);
+      pendingDiagnosisTable.innerHTML = "";
+      if (!agg.length) {
+        pendingDiagnosisTable.innerHTML = "<div class='small-text'>Tiada kes belum ambil tindakan untuk tempoh dipilih.</div>";
+        return;
+      }
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      thead.innerHTML = "<tr><th>Diagnosis</th><th>Bil Kes Belum Tindakan</th></tr>";
+      table.appendChild(thead);
+      const tbody = document.createElement("tbody");
+      agg.forEach(a => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = \`<td>\${a.key}</td><td>\${a.count}</td>\`;
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      pendingDiagnosisTable.appendChild(table);
+    }
+
+    function renderLineList(rows) {
+      lineListTable.innerHTML = "";
+      const maxRows = 200;
+      const subset = rows.slice(0, maxRows);
+      if (!subset.length) {
+        lineListTable.innerHTML = "<div class='small-text'>No records for selected period.</div>";
+        return;
+      }
+
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      thead.innerHTML = \`
+        <tr>
+          <th>Epi Year</th>
+          <th>Epi Week</th>
+          <th>Diagnosis</th>
+          <th>Daerah</th>
+          <th>Mukim/Zon</th>
+          <th>Lokaliti</th>
+          <th>Kemudahan</th>
+          <th>Tarikh Onset</th>
+          <th>Tkh Notifikasi</th>
+          <th>Tkh Daftar</th>
+          <th>Umur (Tahun)</th>
+          <th>Jantina</th>
+          <th>Notifikasi Status</th>
+        </tr>\`;
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+      const fmt = d => d ? d.toISOString().substring(0,10) : "";
+      subset.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = \`
+          <td>\${r.epiYear || ""}</td>
+          <td>\${r.epiWeek || ""}</td>
+          <td>\${r.disease || ""}</td>
+          <td>\${r.district || ""}</td>
+          <td>\${r.mukim || ""}</td>
+          <td>\${r.locality || ""}</td>
+          <td>\${r.facility || ""}</td>
+          <td>\${fmt(r.onsetDate)}</td>
+          <td>\${fmt(r.notifDate)}</td>
+          <td>\${fmt(r.daftarDate)}</td>
+          <td>\${r.ageYear != null ? r.ageYear : ""}</td>
+          <td>\${r.sex || ""}</td>
+          <td>\${r.notifStatus || ""}</td>
+        \`;
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      lineListTable.appendChild(table);
+    }
+
+    function isLateNotification(r) {
+      if (r.dxToNotif == null || !isFinite(r.dxToNotif)) return false;
+      const thr = getNotifThresholdDays(r.disease);
+      return r.dxToNotif > thr;
+    }
+
+    function bucketBarHTML(b) {
+      const total = (b.lt7 || 0) + (b.d8_14 || 0) + (b.gt14 || 0);
+      if (!total) {
+        return \`<div class="mini-bar"></div><div class="mini-bar-label">0 kes</div>\`;
+      }
+      const p1 = (b.lt7 / total) * 100;
+      const p2 = (b.d8_14 / total) * 100;
+      const p3 = (b.gt14 / total) * 100;
+
+      return \`
+        <div class="mini-bar"
+          title="<7 hari: \${b.lt7} | 8–14 hari: \${b.d8_14} | >14 hari: \${b.gt14}">
+          <div class="mini-bar-seg seg-good" style="width:\${p1}%;"></div>
+          <div class="mini-bar-seg seg-med" style="width:\${p2}%;"></div>
+          <div class="mini-bar-seg seg-bad" style="width:\${p3}%;"></div>
+        </div>
+        <div class="mini-bar-label">
+          <span class="text-good">&lt;7 hari: \${b.lt7}</span>
+          &nbsp;|&nbsp;
+          <span class="text-med">8–14 hari: \${b.d8_14}</span>
+          &nbsp;|&nbsp;
+          <span class="text-bad">&gt;14 hari: \${b.gt14}</span>
+        </div>
+      \`;
+    }
+
+    function renderLatenessPKD(selectedLabel) {
+      latenessPKDTable.innerHTML = "";
+      latenessPKDList.innerHTML = "";
+      if (!processedRows.length) return;
+
+      const districtFilter = districtSelect.value;
+      const mukimFilter = mukimSelect.value;
+      const diseaseFilter = diseaseSelect.value;
+
+      let currRows = [];
+      if (selectedLabel === "ALL") {
+        currRows = processedRows.filter(r =>
+          (!districtFilter || r.district === districtFilter) &&
+          (!mukimFilter || r.mukim === mukimFilter) &&
+          (!diseaseFilter || r.disease === diseaseFilter) &&
+          statusFilterPasses(r)
+        );
+      } else {
+        const [yearStr, weekStr] = selectedLabel.split("-W");
+        const year = Number(yearStr);
+        const week = Number(weekStr);
+        currRows = processedRows.filter(r =>
+          Number(r.epiYear) === year &&
+          Number(r.epiWeek) === week &&
+          (!districtFilter || r.district === districtFilter) &&
+          (!mukimFilter || r.mukim === mukimFilter) &&
+          (!diseaseFilter || r.disease === diseaseFilter) &&
+          statusFilterPasses(r)
+        );
+      }
+
+      const pkdSet = new Set();
+      currRows.forEach(r => { if (r.pkd) pkdSet.add(r.pkd); });
+      const pkdList = Array.from(pkdSet).sort();
+      if (!pkdList.length) {
+        latenessPKDTable.innerHTML =
+          "<div class='small-text'>Tiada maklumat PKD dalam tempoh/penapis dipilih.</div>";
+        latenessPKDList.innerHTML =
+          "<div class='small-text'>Tiada kes lewat untuk dipaparkan.</div>";
+        return;
+      }
+
+      function addBucket(bucketObj, diff) {
+        if (diff == null || !isFinite(diff)) return;
+        if (diff <= 7) bucketObj.lt7++;
+        else if (diff <= 14) bucketObj.d8_14++;
+        else bucketObj.gt14++;
+      }
+
+      const pkdStats = {};
+      currRows.forEach(r => {
+        const code = r.pkd || "TANPA PKD";
+        if (!pkdStats[code]) {
+          pkdStats[code] = {
+            total: 0,
+            late: 0,
+            pkdInput: 0,
+            daftarNotif: { lt7: 0, d8_14: 0, gt14: 0 },
+            daftarKes: { lt7: 0, d8_14: 0, gt14: 0 },
+            dxDaftar: { lt7: 0, d8_14: 0, gt14: 0 }
+          };
+        }
+        const s = pkdStats[code];
+        s.total++;
+
+        if (isLateNotification(r)) s.late++;
+        if (isPKDNotifier(r.notifBy)) s.pkdInput++;
+        addBucket(s.daftarNotif, r.inputToDaftarNotif);
+        addBucket(s.daftarKes, r.daftarNotifToDaftarKes);
+        addBucket(s.dxDaftar, r.dxToDaftar);
+      });
+
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      thead.innerHTML = \`
+        <tr>
+          <th>PKD</th>
+          <th>Jumlah Kes</th>
+          <th>Lewat Notifikasi*</th>
+          <th>% Lewat</th>
+          <th>Input PKD</th>
+          <th>% Input PKD</th>
+          <th>Daftar Notifikasi<br>(&lt;7 / 8–14 / &gt;14)</th>
+          <th>Daftar Kes<br>(&lt;7 / 8–14 / &gt;14)</th>
+          <th>Prestasi Daftar Kes<br>(Dx → Daftar)<br>(&lt;7 / 8–14 / &gt;14)</th>
+        </tr>\`;
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+      pkdList.forEach(code => {
+        const s = pkdStats[code];
+        const total = s.total || 1;
+        const latePct = ((s.late / total) * 100).toFixed(1);
+        const pkdInputPct = ((s.pkdInput / total) * 100).toFixed(1);
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = \`
+          <td>\${code}</td>
+          <td>\${s.total.toLocaleString()}</td>
+          <td>\${s.late}</td>
+          <td>\${latePct}%</td>
+          <td>\${s.pkdInput}</td>
+          <td>\${pkdInputPct}%</td>
+          <td>\${bucketBarHTML(s.daftarNotif)}</td>
+          <td>\${bucketBarHTML(s.daftarKes)}</td>
+          <td>\${bucketBarHTML(s.dxDaftar)}</td>
+        \`;
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      latenessPKDTable.appendChild(table);
+
+      const lateCases = currRows.filter(r => isLateNotification(r));
+      if (!lateCases.length) {
+        latenessPKDList.innerHTML =
+          "<div class='small-text'>Tiada kes lewat berdasarkan ambang penyakit-spesifik untuk penapis semasa.</div>";
+        return;
+      }
+    }
+  </script>
+</body>
+</html>

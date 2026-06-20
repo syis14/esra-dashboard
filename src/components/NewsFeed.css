@@ -1,0 +1,188 @@
+.news-feed { margin-bottom: 2rem; }
+
+/* ── Header ─────────────────────────────── */
+.news-feed-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--surface-border);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+.news-feed-header h2 { margin: 0 0 0.2rem; color: var(--text-primary); font-size: 1.05rem; }
+.news-feed-subtitle   { font-size: 0.8rem; color: var(--text-secondary); }
+.news-last-updated    { opacity: 0.65; }
+
+.news-refresh-btn {
+  background: var(--surface-elevated);
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  padding: 0.3rem 0.6rem;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+.news-refresh-btn:hover:not(:disabled) { background: var(--accent-color); border-color: var(--accent-color); }
+.news-refresh-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Source legend ─────────────────────── */
+.source-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.9rem;
+}
+.legend-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #fff;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+/* ── Loading ─────────────────────────── */
+.news-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2.5rem 1rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+.news-spinner {
+  width: 32px; height: 32px;
+  border: 3px solid var(--surface-border);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.small-hint { font-size: 0.76rem; opacity: 0.7; }
+
+/* ── Error / Placeholder ─────────────── */
+.news-error-state {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-secondary);
+}
+.placeholder-text {
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 2.5rem 1rem;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+/* ── List ─────────────────────────────── */
+.news-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 68vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.news-list::-webkit-scrollbar       { width: 4px; }
+.news-list::-webkit-scrollbar-track { background: transparent; }
+.news-list::-webkit-scrollbar-thumb { background: var(--surface-border); border-radius: 4px; }
+
+/* ── Item ─────────────────────────────── */
+.news-item {
+  background: var(--surface-elevated);
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  border-left: 4px solid var(--accent-color);
+  transition: var(--transition);
+}
+.news-item:hover { border-left-color: #818cf8; transform: translateX(3px); }
+
+.news-title-link { text-decoration: none; color: inherit; }
+.news-title-link:hover h3 { color: var(--accent-color); }
+
+.news-item h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.45;
+  margin-bottom: 0.45rem;
+  transition: color 0.2s;
+}
+.news-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.45rem;
+}
+.news-source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.14rem 0.48rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+.news-time {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.news-snippet {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── ESRA Summary bar ───────────────────── */
+.esra-summary-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+  padding: 0.45rem 0.75rem;
+  background: var(--surface-elevated);
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+}
+.esra-bar-item {
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+.esra-bar-total { font-size: 0.72rem; color: var(--text-secondary); }
+
+/* ── ESRA Score chip on each article ─────── */
+.esra-score-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.18rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+.esra-score-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  opacity: 0.85;
+  padding-left: 0.3rem;
+  border-left: 1px solid currentColor;
+}
