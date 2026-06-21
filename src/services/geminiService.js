@@ -22,7 +22,7 @@ export async function screenWithGemini(items, apiKey, state = '', district = '')
 - Read and understand all articles, translating Chinese/Tamil/English to contextually match them.
 - Deduplicate identical events. If two or more articles report the exact same incident, group them together (e.g. "Three dead in crash" and "Tiga maut kemalangan").
 - Filter out irrelevant news (e.g. property ads, general politics, normal business, elections, sports).
-- Select up to 10 most critical EBS events (outbreaks, deaths, disasters, poisoning, disease clusters).
+- Select and include ALL relevant EBS events (outbreaks, deaths, disasters, poisoning, disease clusters). Do not artificially limit the list count.
 ${districtInstruction}- Return ONLY a pure JSON array. No explanation, no markdown, just raw JSON.
 For each event, return an object with:
   - "keptId": number (ID of the best article, prefer Malay/English)
