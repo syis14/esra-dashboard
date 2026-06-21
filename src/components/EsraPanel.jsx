@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './EsraPanel.css';
 import { screenWithGemini, testGeminiApiKey } from '../services/geminiService';
+import { shortenUrl } from '../services/newsService';
 
 const EsraPanel = ({ state, district, newsItems = [] }) => {
   const [loading, setLoading]     = useState(false);
@@ -148,10 +149,26 @@ const EsraPanel = ({ state, district, newsItems = [] }) => {
       }
     }
 
+    // Shorten long URLs in parallel
+    const shortenedItems = await Promise.all(
+      itemsToReport.map(async (item) => {
+        if (item.link) {
+          try {
+            const shortLink = await shortenUrl(item.link);
+            return { ...item, link: shortLink };
+          } catch (e) {
+            console.error('Error shortening URL:', e);
+            return item;
+          }
+        }
+        return item;
+      })
+    );
+
     const now     = new Date();
     const timeStr = now.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const dateStr = now.toLocaleDateString('ms-MY', { day: 'numeric', month: 'long', year: 'numeric' });
-    const result  = buildReport(itemsToReport);
+    const result  = buildReport(shortenedItems);
     
     setReport(result);
     setLastRunTime(`${dateStr}, ${timeStr}`);

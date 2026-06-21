@@ -480,3 +480,51 @@ export async function fetchEBSNews(state, district, timeFrame = '24h', customSta
 
   return scored.slice(0, 25);
 }
+
+/**
+ * Shortens a URL using TinyURL or da.gd with proper abort timeouts.
+ * Falls back to the original URL if they fail or time out.
+ */
+export async function shortenUrl(longUrl) {
+  if (!longUrl) return '';
+  if (longUrl.length < 60) return longUrl;
+
+  // Try tinyurl.com first
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`, {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if (res.ok) {
+      const short = await res.text();
+      if (short && short.trim().startsWith('http')) {
+        return short.trim();
+      }
+    }
+  } catch (err) {
+    console.warn('TinyURL shortener failed, trying da.gd...', err);
+  }
+
+  // Try da.gd as fallback
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(`https://da.gd/s?url=${encodeURIComponent(longUrl)}`, {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if (res.ok) {
+      const short = await res.text();
+      if (short && short.trim().startsWith('http')) {
+        return short.trim();
+      }
+    }
+  } catch (err) {
+    console.warn('da.gd shortener failed, falling back to original link', err);
+  }
+
+  return longUrl;
+}
+
