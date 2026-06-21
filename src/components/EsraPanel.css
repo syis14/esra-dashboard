@@ -10,7 +10,8 @@
   border-radius: 4px;
   margin-bottom: 1.25rem;
 }
-.disclaimer-banner strong { color: #d97706; display: block; margin-bottom: 0.4rem; font-size: 0.85rem; }
+.disclaimer-banner > strong { color: #d97706; display: block; margin-bottom: 0.4rem; font-size: 0.85rem; }
+.disclaimer-banner p strong { color: #d97706; font-weight: 700; }
 .disclaimer-banner p       { color: var(--text-secondary); font-size: 0.78rem; margin: 0; line-height: 1.55; }
 
 /* ── Status pill ─────────────────────────────── */
