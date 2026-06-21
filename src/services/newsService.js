@@ -401,9 +401,11 @@ export async function fetchEBSNews(state, district, timeFrame = '24h', customSta
       // 3. Keselamatan Makanan, Air & Alam Sekitar (Food, Water, Env)
       `${loc} (keracunan OR pencemaran OR toksik OR kimia OR poisoning OR contaminated OR toxic OR chemical OR 中毒 OR 污染 OR 有毒 OR விஷம் OR மாசடைந்த)`,
       // 4. Bencana Alam, Radiasi & Bahan Kimia (Disasters & Hazards)
-      `${loc} (bencana OR banjir OR runtuh OR letupan OR disaster OR flood OR landslide OR explosion OR 灾难 OR 洪水 OR 爆炸 OR பேriடர் OR வெள்ளம்)`, 
+      `${loc} (bencana OR banjir OR runtuh OR letupan OR disaster OR flood OR landslide OR explosion OR 灾难 OR 洪水 OR 爆炸 OR பேரிடர் OR வெள்ளம்)`, 
       // 5. Insiden Massa & Kapasiti Kesihatan (Mass Incidents & Capacity)
-      `${loc} ("kemalangan maut" OR rusuhan OR kecemasan OR hospital OR "fatal accident" OR riot OR emergency OR 致命车祸 OR 骚乱 OR 医院 OR விபத்து OR கலவரம் OR மருத்துவமனை)` 
+      `${loc} ("kemalangan maut" OR rusuhan OR kecemasan OR hospital OR "fatal accident" OR riot OR emergency OR 致命车祸 OR 骚乱 OR 医院 OR விபத்து OR கலவரம் OR மருத்துவமனை)`,
+      // 6. Social Media target queries for localized events
+      `${loc} (site:facebook.com OR site:x.com OR site:twitter.com OR site:threads.net) (wabak OR denggi OR keracunan OR banjir OR hospital)` 
     ];
 
     // Tambah carian umum berserta media tempatan
