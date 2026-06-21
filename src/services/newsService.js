@@ -9,13 +9,64 @@ import { malaysiaLocations } from '../data/malaysiaLocations';
 // ─── SOURCE DISPLAY ──────────────────────────────────────────────────────────
 
 export const SOURCE_BADGE_COLORS = {
-  'news.google.com': '#4285f4',
-  'reddit.com':      '#ff4500',
+  'news.google.com':       '#4285f4',
+  'reddit.com':            '#ff4500',
+  'bharian.com.my':        '#0a2240',
+  'sinarharian.com.my':    '#e31b23',
+  'hmetro.com.my':         '#00529b',
+  'astroawani.com':        '#ec1c24',
+  'malaysiakini.com':      '#b22222',
+  'thestar.com.my':        '#ed1c24',
+  'utusan.com.my':         '#005bab',
+  'freemalaysiatoday.com': '#e50e0e',
 };
 export const SOURCE_ICONS = {
-  'news.google.com': '🔍',
-  'reddit.com':      '🔴',
+  'news.google.com':       '🔍',
+  'reddit.com':            '🔴',
+  'bharian.com.my':        '📰',
+  'sinarharian.com.my':    '📰',
+  'hmetro.com.my':         '📰',
+  'astroawani.com':        '📺',
+  'malaysiakini.com':      '📰',
+  'thestar.com.my':        '📰',
+  'utusan.com.my':         '📰',
+  'freemalaysiatoday.com': '📰',
 };
+
+// Helper to extract clean domain from URL
+function getDomain(url) {
+  try {
+    return new URL(url).hostname.replace('www.', '');
+  } catch {
+    return 'news.google.com';
+  }
+}
+
+// Helper to decode Google News RSS tracking URL to actual publisher destination
+function decodeGoogleNewsUrl(sourceUrl) {
+  try {
+    if (!sourceUrl.includes('news.google.com/rss/articles/')) return sourceUrl;
+    const parts = sourceUrl.split('/');
+    const base64Part = parts[parts.length - 1];
+    
+    let cleanedB64 = base64Part.split('?')[0];
+    
+    // Add base64 padding
+    while (cleanedB64.length % 4 !== 0) {
+      cleanedB64 += '=';
+    }
+    
+    const decoded = atob(cleanedB64.replace(/-/g, '+').replace(/_/g, '/'));
+    const httpIdx = decoded.indexOf('http');
+    if (httpIdx === -1) return sourceUrl;
+    
+    let extracted = decoded.substring(httpIdx);
+    const match = extracted.match(/https?:\/\/[^\s"'<>\(\)\{\}\[\]\\^\`\x00-\x1f\x7f-\xff]+/);
+    return match ? match[0] : sourceUrl;
+  } catch (e) {
+    return sourceUrl;
+  }
+}
 
 // ─── STATE KEYWORDS & LOCAL MEDIA ───────────────────────────────────────────────
 
@@ -159,8 +210,15 @@ function isRelevant(item, keywords, state = '', district = '') {
   const t = item.title.toLowerCase();
   const s = (item.snippet || '').toLowerCase();
   
-  // 1. If a specific district is selected, filter out other districts of the same state
-  if (state && district && malaysiaLocations[state]) {
+  // Special case: Melaka Tengah
+  if (state === 'Melaka' && district === 'Melaka Tengah') {
+    const mentionsOther = ['alor gajah', 'jasin'].some(d => {
+      const regex = new RegExp(`\\b${d}\\b`, 'i');
+      return regex.test(t) || regex.test(s);
+    });
+    if (mentionsOther) return false;
+  } else if (state && state !== 'Malaysia' && district && malaysiaLocations[state]) {
+    // 1. If a specific district is selected, filter out other districts of the same state
     const matchesDistrict = t.includes(district.toLowerCase()) || s.includes(district.toLowerCase());
     
     if (!matchesDistrict) {
@@ -178,20 +236,26 @@ function isRelevant(item, keywords, state = '', district = '') {
     }
   }
 
-  // 2. Mesti mengandungi nama negeri/daerah
-  const hasLocation = keywords.some(k => {
-    const lk = k.toLowerCase();
-    return t.includes(lk) || s.includes(lk);
-  });
+  // 2. Mesti mengandungi nama negeri/daerah (kecuali Malaysia)
+  if (state !== 'Malaysia') {
+    const hasLocation = keywords.some(k => {
+      const lk = k.toLowerCase();
+      return t.includes(lk) || s.includes(lk);
+    });
+    if (!hasLocation) return false;
+  }
 
-  if (!hasLocation) return false;
-
-  // 3. Buang spam iklan (Hartanah, Jualan, Promosi, Sewa, Pekerjaan)
+  // 3. Buang spam iklan dan berita tidak relevan
   const garbageWords = [
     'sewa', 'rent', 'property', 'hartanah', 'jual', 'beli', 'sale', 'sales',
     'shopee', 'lazada', 'discount', 'diskaun', 'shop', 'retail', 'space for',
     'condo', 'apartment', 'villa', 'jawatan kosong', 'hiring', 'vacancy',
-    'offer', 'promosi', 'promotion', 'voucher', 'ringgit', 'rm', 'harga'
+    'offer', 'promosi', 'promotion', 'voucher', 'ringgit', 'rm', 'harga',
+    'pilihan raya', 'pilihanraya', 'prk', 'pru', 'undi', 'pengundi', 'parlimen', 'dun', 'calon', 'kempen',
+    'sukan', 'bola sepak', 'bolasepak', 'badminton', 'olimpik', 'skuad', 'liga', 'perlawanan',
+    'artis', 'pelakon', 'penyanyi', 'konsert', 'filem', 'drama', 'sinema', 'hiburan',
+    'saham', 'bursa', 'pelaburan', 'dividen', 'kewangan', 'ekonomi',
+    'resepi', 'resipi', 'masakan', 'menu', 'restoran'
   ];
 
   const isGarbage = garbageWords.some(w => t.includes(` ${w} `) || t.includes(`${w} `) || t.endsWith(w));
@@ -204,29 +268,31 @@ function isRelevant(item, keywords, state = '', district = '') {
 // ─── DATE CUTOFF HELPER ────────────────────────────────────────────────────────
 
 /**
- * Returns the exact 24-hour window for the current report.
- * Cutoff is exactly 8:00 AM. 
- * If current time is >= 8:00 AM today, the window is Yesterday 8:00 AM to Today 8:00 AM.
- * If current time is < 8:00 AM today, the window is Day Before Yesterday 8:00 AM to Yesterday 8:00 AM.
+ * Returns a dynamic window based on selected timeframe.
  */
-function getReportWindow() {
-  const now = new Date();
-  const end = new Date(now);
-  end.setHours(8, 0, 0, 0);
-
-  if (now.getTime() < end.getTime()) {
-    end.setDate(end.getDate() - 1);
+function getReportWindow(timeFrame, customStart = null, customEnd = null) {
+  if (timeFrame === 'custom' && customStart && customEnd) {
+    return { start: new Date(customStart), end: new Date(customEnd) };
   }
 
+  const end = new Date();
   const start = new Date(end);
-  start.setDate(start.getDate() - 1);
+
+  if (timeFrame === '3d') {
+    start.setDate(start.getDate() - 3);
+  } else if (timeFrame === '7d') {
+    start.setDate(start.getDate() - 7);
+  } else {
+    // default 24h
+    start.setHours(start.getHours() - 24);
+  }
 
   return { start, end };
 }
 
 const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzBFKLUNSGo39jWGirr_kzh52k2EqRinEIblR3Y7bD10MGlC4LD3OnPiBBivUzZh4m8EQ/exec';
 
-async function fetchGasBackend(query) {
+async function fetchGasBackend(query, timeFrame, customStart, customEnd) {
   try {
     // We send 'q' parameter so React controls the exact keywords
     const url = `${GAS_API_URL}?q=${encodeURIComponent(query)}`;
@@ -236,29 +302,37 @@ async function fetchGasBackend(query) {
     const json = await resp.json();
     if (json.status !== 'success' || !json.data) return [];
 
-    const { start, end } = getReportWindow();
+    const { start, end } = getReportWindow(timeFrame, customStart, customEnd);
 
     return json.data
       .filter(item => {
         const pubDate = new Date(item.pubDate);
         return pubDate >= start && pubDate <= end;
       })
-      .map(item => ({
-        id:       item.link || Math.random().toString(),
-        title:    item.title || '',
-        source:   item.source || 'Google News',
-        domain:   'news.google.com',
-        link:     item.link || '',
-        snippet:  '', 
-        time:     formatRelativeTime(new Date(item.pubDate)),
-        pubDate:  new Date(item.pubDate),
-      }));
+      .map(item => {
+        const cleanLink = decodeGoogleNewsUrl(item.link || '');
+        return {
+          id:       item.link || Math.random().toString(),
+          title:    item.title || '',
+          source:   item.source || 'Google News',
+          domain:   getDomain(cleanLink),
+          link:     cleanLink,
+          snippet:  '', 
+          time:     formatRelativeTime(new Date(item.pubDate)),
+          pubDate:  new Date(item.pubDate),
+        };
+      });
   } catch { return []; }
 }
 
-async function fetchReddit(query) {
-  // Use t=week to ensure we fetch past 8 AM yesterday
-  const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&sort=new&limit=25&t=week`;
+async function fetchReddit(query, timeFrame, customStart, customEnd) {
+  let tParams = 'week';
+  if (timeFrame === '24h') tParams = 'day';
+  if (timeFrame === '3d') tParams = 'week';
+  if (timeFrame === '7d') tParams = 'week';
+  if (timeFrame === 'custom') tParams = 'all'; // get all, filter locally
+
+  const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&sort=new&limit=25&t=${tParams}`;
   try {
     const resp = await fetch(url, {
       headers: { 'User-Agent': 'ESRA-EBS-Dashboard/1.0' },
@@ -268,7 +342,7 @@ async function fetchReddit(query) {
     const data  = await resp.json();
     const posts = data?.data?.children || [];
     
-    const { start, end } = getReportWindow();
+    const { start, end } = getReportWindow(timeFrame, customStart, customEnd);
 
     return posts
       .filter(p => {
@@ -294,44 +368,60 @@ async function fetchReddit(query) {
  * Fetch EBS-focused news for a state/district.
  * Returns articles with ESRA scores attached, sorted by risk (Red → Yellow → Green) then date.
  */
-export async function fetchEBSNews(state, district) {
-  const keywords = [...(STATE_KEYWORDS[state] || [state])];
+export async function fetchEBSNews(state, district, timeFrame = '24h', customStart = null, customEnd = null) {
+  const keywords = state === 'Malaysia' ? ['Malaysia'] : [...(STATE_KEYWORDS[state] || [state])];
   if (district) keywords.unshift(district);
-  const loc = district ? `"${district}"` : `"${state}"`;
+  
+  // For Melaka Tengah, search for "Melaka" to broaden search, then filter out other districts locally
+  const loc = (state === 'Melaka' && district === 'Melaka Tengah')
+    ? `"Melaka"`
+    : (state === 'Malaysia' ? `"Malaysia"` : (district ? `"${district}"` : `"${state}"`));
 
   const localMedia = STATE_MEDIA[state] ? ` OR ${STATE_MEDIA[state]}` : '';
 
-  // 1. KKM/WHO Event-Based Surveillance (EBS) Target Queries
-  // Menggunakan terma "payung" (umbrella terms) dalam 4 bahasa (Melayu, Inggeris, Cina, Tamil)
-  // supaya kita tidak terikat pada nama spesifik penyakit, dan dapat menangkap akhbar vernakular.
-  const ebsQueries = [
-    // 1. Penyakit Berjangkit & Zoonotik (Infectious & Zoonotic)
-    `${loc} (wabak OR jangkitan OR virus OR outbreak OR infection OR disease OR 疫情 OR 感染 OR 病毒 OR தொற்றுநோய் OR பரவல்)`, 
-    // 2. Kematian Luar Biasa / Simptom Misteri (Mystery Death/Symptoms)
-    `${loc} ("kematian mengejut" OR misteri OR "simptom pelik" OR "sudden death" OR "mystery illness" OR 猝死 OR 不明疾病 OR "திடீர் மரணம்" OR "மர்ம நோய்")`,
-    // 3. Keselamatan Makanan, Air & Alam Sekitar (Food, Water, Env)
-    `${loc} (keracunan OR pencemaran OR toksik OR kimia OR poisoning OR contaminated OR toxic OR chemical OR 中毒 OR 污染 OR 有毒 OR விஷம் OR மாசடைந்த)`,
-    // 4. Bencana Alam, Radiasi & Bahan Kimia (Disasters & Hazards)
-    `${loc} (bencana OR banjir OR runtuh OR letupan OR disaster OR flood OR landslide OR explosion OR 灾难 OR 洪水 OR 爆炸 OR பேரிடர் OR வெள்ளம்)`, 
-    // 5. Insiden Massa & Kapasiti Kesihatan (Mass Incidents & Capacity)
-    `${loc} ("kemalangan maut" OR rusuhan OR kecemasan OR hospital OR "fatal accident" OR riot OR emergency OR 致命车祸 OR 骚乱 OR 医院 OR விபத்து OR கலவரம் OR மருத்துவமனை)` 
-  ];
+  let ebsQueries = [];
 
-  // Tambah carian umum berserta media tempatan
-  if (localMedia) {
-    ebsQueries.push(`${loc} (kesihatan OR hospital OR kemalangan ${localMedia})`);
+  if (state === 'Malaysia') {
+    // Broader searches for the entire country
+    ebsQueries = [
+      `${loc} (wabak OR jangkitan OR virus OR outbreak OR penyakit berjangkit OR demam OR kkm)`,
+      `${loc} ("kematian misteri" OR "simptom pelik" OR "kesihatan awam" OR kecemasan OR hospital)`,
+      `${loc} (keracunan makanan OR pencemaran air OR toksik OR kimia OR sisa)`,
+      `${loc} (bencana alam OR banjir OR runtuh OR letupan OR kebakaran besar)`
+    ];
+  } else {
+    // 1. KKM/WHO Event-Based Surveillance (EBS) Target Queries
+    // Menggunakan terma "payung" (umbrella terms) dalam 4 bahasa (Melayu, Inggeris, Cina, Tamil)
+    // supaya kita tidak terikat pada nama spesifik penyakit, dan dapat menangkap akhbar vernakular.
+    ebsQueries = [
+      // 1. Penyakit Berjangkit & Zoonotik (Infectious & Zoonotic)
+      `${loc} (wabak OR jangkitan OR virus OR outbreak OR infection OR disease OR 疫情 OR 感染 OR 病毒 OR தொற்றுநோய் OR பரவல்)`, 
+      // 2. Kematian Luar Biasa / Simptom Misteri (Mystery Death/Symptoms)
+      `${loc} ("kematian mengejut" OR misteri OR "simptom pelik" OR "sudden death" OR "mystery illness" OR 猝死 OR 不明疾病 OR "திடீர் மரணம்" OR "மர்ம நோய்")`,
+      // 3. Keselamatan Makanan, Air & Alam Sekitar (Food, Water, Env)
+      `${loc} (keracunan OR pencemaran OR toksik OR kimia OR poisoning OR contaminated OR toxic OR chemical OR 中毒 OR 污染 OR 有毒 OR விஷம் OR மாசடைந்த)`,
+      // 4. Bencana Alam, Radiasi & Bahan Kimia (Disasters & Hazards)
+      `${loc} (bencana OR banjir OR runtuh OR letupan OR disaster OR flood OR landslide OR explosion OR 灾难 OR 洪水 OR 爆炸 OR பேriடர் OR வெள்ளம்)`, 
+      // 5. Insiden Massa & Kapasiti Kesihatan (Mass Incidents & Capacity)
+      `${loc} ("kemalangan maut" OR rusuhan OR kecemasan OR hospital OR "fatal accident" OR riot OR emergency OR 致命车祸 OR 骚乱 OR 医院 OR விபத்து OR கலவரம் OR மருத்துவமனை)` 
+    ];
+
+    // Tambah carian umum berserta media tempatan
+    if (localMedia) {
+      ebsQueries.push(`${loc} (kesihatan OR hospital OR kemalangan ${localMedia})`);
+    }
   }
 
   // Fire GAS queries in parallel
   const gnResults = await Promise.allSettled(
-    ebsQueries.map(q => fetchGasBackend(q))
+    ebsQueries.map(q => fetchGasBackend(q, timeFrame, customStart, customEnd))
   );
   
   // Flatten results
   const gnItems = gnResults.flatMap(r => r.status === 'fulfilled' ? r.value : []);
 
   // 2. Reddit fetch (merangkumi kesemua EBS secara rawak)
-  const rdItems = await fetchReddit(`${loc} (banjir OR hospital OR kemalangan OR penyakit OR keracunan OR mati)`);
+  const rdItems = await fetchReddit(`${loc} (banjir OR hospital OR kemalangan OR penyakit OR keracunan OR mati)`, timeFrame, customStart, customEnd);
 
   // Gabungkan hasil dari GAS dan Reddit
   const all      = [...gnItems, ...rdItems];

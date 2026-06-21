@@ -33,9 +33,13 @@ const LocationSelector = ({ selectedState, setSelectedState, selectedDistrict, s
             className="input-field"
             value={selectedDistrict} 
             onChange={(e) => setSelectedDistrict(e.target.value)}
-            disabled={!selectedState}
+            disabled={!selectedState || selectedState === 'Malaysia'}
           >
-            <option value="">-- Seluruh Negeri (Peringkat JKN) --</option>
+            {selectedState === 'Malaysia' ? (
+              <option value="">-- Seluruh Malaysia --</option>
+            ) : (
+              <option value="">-- Seluruh Negeri (Peringkat JKN) --</option>
+            )}
             {districts.map(district => (
               <option key={district} value={district}>{district}</option>
             ))}
