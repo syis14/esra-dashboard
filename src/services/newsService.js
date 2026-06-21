@@ -384,7 +384,7 @@ export async function fetchEBSNews(state, district, timeFrame = '24h', customSta
   if (state === 'Malaysia') {
     // Broader searches for the entire country
     ebsQueries = [
-      `${loc} (wabak OR jangkitan OR virus OR outbreak OR penyakit berjangkit OR demam OR kkm)`,
+      `${loc} (wabak OR jangkitan OR virus OR outbreak OR penyakit berjangkit OR demam OR kkm OR promed)`,
       `${loc} ("kematian misteri" OR "simptom pelik" OR "kesihatan awam" OR kecemasan OR hospital)`,
       `${loc} (keracunan makanan OR pencemaran air OR toksik OR kimia OR sisa)`,
       `${loc} (bencana alam OR banjir OR runtuh OR letupan OR kebakaran besar)`
@@ -395,7 +395,7 @@ export async function fetchEBSNews(state, district, timeFrame = '24h', customSta
     // supaya kita tidak terikat pada nama spesifik penyakit, dan dapat menangkap akhbar vernakular.
     ebsQueries = [
       // 1. Penyakit Berjangkit & Zoonotik (Infectious & Zoonotic)
-      `${loc} (wabak OR jangkitan OR virus OR outbreak OR infection OR disease OR 疫情 OR 感染 OR 病毒 OR தொற்றுநோய் OR பரவல்)`, 
+      `${loc} (wabak OR jangkitan OR virus OR outbreak OR promed OR infection OR disease OR 疫情 OR 感染 OR 病毒 OR தொற்றுநோய் OR பரவல்)`, 
       // 2. Kematian Luar Biasa / Simptom Misteri (Mystery Death/Symptoms)
       `${loc} ("kematian mengejut" OR misteri OR "simptom pelik" OR "sudden death" OR "mystery illness" OR 猝死 OR 不明疾病 OR "திடீர் மரணம்" OR "மர்ம நோய்")`,
       // 3. Keselamatan Makanan, Air & Alam Sekitar (Food, Water, Env)
