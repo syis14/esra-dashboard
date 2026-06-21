@@ -189,9 +189,9 @@ const EsraPanel = ({ state, district, newsItems = [] }) => {
       <div className="disclaimer-banner">
         <strong>⚠️ Disclaimer & Sumber Data:</strong>
         <p>
-          Berita diambil secara masa nyata daripada Google News dan Reddit menggunakan carian EBS-fokus
-          (wabak, denggi, banjir, keracunan, hospital dll). Skor ESRA dikira automatik berdasarkan
-          kata kunci. Laporan ini untuk saringan awal — pengesahan pegawai diperlukan sebelum tindakan lanjut.
+          Berita diambil secara masa nyata daripada <strong>Google News</strong> (termasuk indeks laporan <strong>ProMED-mail</strong>) dan <strong>Reddit</strong> menggunakan carian terfokus EBS 
+          (wabak, denggi, banjir, keracunan, kapasiti hospital dll). Skor ESRA dikira secara automatik berdasarkan
+          kata kunci. Laporan ini bertujuan untuk saringan awal sahaja — pengesahan pegawai CPRC/Epidemiologi diperlukan sebelum sebarang tindakan susulan.
         </p>
       </div>
 
