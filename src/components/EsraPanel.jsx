@@ -58,7 +58,7 @@ const EsraPanel = ({ state, district, newsItems = [] }) => {
   const roleName   = district ? 'Pejabat Kesihatan Daerah (PKD)' : 'Jabatan Kesihatan Negeri (JKN)';
 
   /* ── Build WhatsApp-ready plain text report from real news ─────────────── */
-  const buildReport = (items) => {
+  const buildReport = (items, audit) => {
     const now     = new Date();
     
     // Format date like: 20 JUN 2026
@@ -93,6 +93,24 @@ const EsraPanel = ({ state, district, newsItems = [] }) => {
 
     const allNewsText = items.map(formatItem).join('\n\n');
 
+    let auditText = '';
+    if (audit) {
+      const aiStatusStr = audit.aiScreened 
+        ? `Aktif (Semantik: ${audit.aiInputCount} -> ${audit.aiOutputCount})` 
+        : 'Nyahaktif';
+      auditText = [
+        ``,
+        ``,
+        `*Laluan Audit (Audit Trail):*`,
+        `- Tapisan Lokasi: ${state}${district ? ` (Daerah: ${district})` : ''}`,
+        `- Tarikh Carian: ${dateStr} @ ${timeStr}`,
+        `- Berita Mentah: ${audit.rawCount} (Google News: ${audit.gnCount}, Reddit: ${audit.redditCount})`,
+        `- Tapisan Relevansi: ${audit.afterFilterCount} lulus`,
+        `- Saringan AI (Gemini): ${aiStatusStr}`,
+        `- Jumlah Akhir Laporan: ${items.length} berita`
+      ].join('\n');
+    }
+
     const reportText = [
       `*LAPORAN HARIAN PEMANTAUAN PELAPORAN MEDIA ONLINE*`,
       `*${dateStr} , ${dayStr}@ ${timeStr}*`,
@@ -106,8 +124,9 @@ const EsraPanel = ({ state, district, newsItems = [] }) => {
       `Sumber berita : ${uniqueSources || items.length}`,
       `Kod Merah : ${red.length}`,
       `Kod Kuning : ${yellow.length}`,
-      `Kod Hijau    : ${green.length}`
-    ].join('\n');
+      `Kod Hijau    : ${green.length}`,
+      auditText
+    ].filter(Boolean).join('\n');
 
     // Default overall risk calculation (for UI only)
     const overallRisk = red.length >= 2 ? '🔴 TINGGI'
@@ -115,7 +134,7 @@ const EsraPanel = ({ state, district, newsItems = [] }) => {
                       : yellow.length >= 2 ? '🟡 SEDERHANA'
                       : '🟢 RENDAH';
 
-    return { reportText, dateStr, timeStr, red, yellow, green, overallRisk, items };
+    return { reportText, dateStr, timeStr, red, yellow, green, overallRisk, items, audit };
   };
 
   const generateReport = async () => {
@@ -165,10 +184,30 @@ const EsraPanel = ({ state, district, newsItems = [] }) => {
       })
     );
 
+    // Construct Audit Trail info from the newsItems array metadata
+    const rawStats = newsItems.auditTrail || {
+      rawGoogleNewsCount: 0,
+      rawRedditCount: 0,
+      totalRawCount: newsItems.length,
+      afterFilterCount: newsItems.length,
+      afterDedupCount: newsItems.length,
+      finalFeedCount: newsItems.length
+    };
+
+    const audit = {
+      rawCount: rawStats.totalRawCount,
+      gnCount: rawStats.rawGoogleNewsCount,
+      redditCount: rawStats.rawRedditCount,
+      afterFilterCount: rawStats.afterFilterCount,
+      aiScreened: !!(aiFilter && geminiKey),
+      aiInputCount: newsItems.length,
+      aiOutputCount: shortenedItems.length,
+    };
+
     const now     = new Date();
     const timeStr = now.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const dateStr = now.toLocaleDateString('ms-MY', { day: 'numeric', month: 'long', year: 'numeric' });
-    const result  = buildReport(shortenedItems);
+    const result  = buildReport(shortenedItems, audit);
     
     setReport(result);
     setLastRunTime(`${dateStr}, ${timeStr}`);
@@ -335,6 +374,47 @@ const EsraPanel = ({ state, district, newsItems = [] }) => {
           <div className="report-preview">
             <pre className="report-text">{report.reportText}</pre>
           </div>
+
+          {/* Visual Audit Trail Card */}
+          {report.audit && (
+            <div className="audit-trail-card" style={{
+              marginTop: '1rem',
+              padding: '1rem',
+              background: 'rgba(255, 255, 255, 0.03)',
+              borderRadius: '8px',
+              border: '1px dashed var(--surface-border)',
+              fontSize: '0.85rem',
+              color: 'var(--text-secondary)'
+            }}>
+              <h4 style={{ margin: '0 0 0.6rem 0', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.9rem' }}>
+                📋 Log Audit Trail (Validator Saringan)
+              </h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.8rem' }}>
+                <div>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Lokasi Tapisan:</span><br />
+                  <strong style={{ color: 'var(--text-primary)' }}>{state} {district ? `(${district})` : ''}</strong>
+                </div>
+                <div>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Berita Mentah:</span><br />
+                  <strong style={{ color: 'var(--text-primary)' }}>{report.audit.rawCount}</strong> ({report.audit.gnCount} Google News, {report.audit.redditCount} Reddit)
+                </div>
+                <div>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Tapisan Relevansi:</span><br />
+                  <strong style={{ color: 'var(--text-primary)' }}>{report.audit.afterFilterCount} lulus</strong>
+                </div>
+                <div>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Saringan AI Gemini:</span><br />
+                  <strong style={report.audit.aiScreened ? { color: 'var(--accent-color)' } : { color: 'var(--text-secondary)' }}>
+                    {report.audit.aiScreened ? `Aktif (${report.audit.aiInputCount} ➡️ ${report.audit.aiOutputCount})` : 'Nyahaktif'}
+                  </strong>
+                </div>
+              </div>
+              <div style={{ marginTop: '0.8rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.6rem', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <span>Jumlah Laporan Akhir: <strong style={{ color: 'var(--text-primary)' }}>{report.items.length} berita</strong></span>
+                <span style={{ fontStyle: 'italic', fontSize: '0.8rem' }}>Penanda Laluan Audit automatik dibenamkan di bahagian bawah teks WhatsApp.</span>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -478,7 +478,17 @@ export async function fetchEBSNews(state, district, timeFrame = '24h', customSta
     return rDiff !== 0 ? rDiff : b.pubDate - a.pubDate;
   });
 
-  return scored.slice(0, 25);
+  const finalItems = scored.slice(0, 25);
+  finalItems.auditTrail = {
+    rawGoogleNewsCount: gnItems.length,
+    rawRedditCount: rdItems.length,
+    totalRawCount: gnItems.length + rdItems.length,
+    afterFilterCount: relevant.length,
+    afterDedupCount: scored.length,
+    finalFeedCount: finalItems.length
+  };
+
+  return finalItems;
 }
 
 /**
